@@ -46,7 +46,8 @@ public class CubemanController : MonoBehaviour
         verticle, horizontal, slash
     }
 
-    enum Body:int{
+    enum Body : int
+    {
         Hip_Center, Spine, Shoulder_Center, Head,  // 0 - 3
         Shoulder_Left, Elbow_Left, Wrist_Left, Hand_Left,  // 4 - 7
         Shoulder_Right, Elbow_Right, Wrist_Right, Hand_Right,  // 8 - 11
@@ -66,7 +67,7 @@ public class CubemanController : MonoBehaviour
 
     //下面是一些常用函釋
     Boolean isBodyStraight() //身體是否為直
-    {      
+    {
         Boolean positionCorrect;
         positionCorrect = direction(getSlopeByBodyPoint(Body.Shoulder_Center, Body.Hip_Center)).Equals(Direction.verticle);
         if (!positionCorrect)
@@ -186,8 +187,60 @@ public class CubemanController : MonoBehaviour
 
     //字的Libary從這裡開始加入謝謝
 
+    Boolean isKingWord()//是王字
+    { 
+        Boolean positionCorrect;
+        positionCorrect = direction(getSlopeByBodyPoint(Body.Hand_Right, Body.Shoulder_Right)).Equals(Direction.horizontal);
+        if (!positionCorrect)
+        {
+            return false;
+        };
+        positionCorrect = direction(getSlopeByBodyPoint(Body.Hand_Left, Body.Shoulder_Left)).Equals(Direction.horizontal);
+        if (!positionCorrect)
+        {
+            return false;
+        };
+
+        positionCorrect = isBodyStraight();
+        if (!positionCorrect)
+        {
+            return false;
+        };
+        Debug.Log(">>王right!!!");    //不debug時可註解此行
+        return true;
+    }
+
+    Boolean isMiWord()//是米字
+    {
+        Boolean positionCorrect;
+        //右手往斜上,左手往斜下
+        positionCorrect = direction(getSlopeByBodyPoint(Body.Hand_Right, Body.Shoulder_Right)).Equals(Direction.slash) && 
+            UpDown(getSlopeByBodyPoint(Body.Hand_Right, Body.Shoulder_Right), (int)(Body.Hand_Right)) == vDir.down && 
+            direction(getSlopeByBodyPoint(Body.Hand_Left, Body.Shoulder_Left)).Equals(Direction.slash) && 
+            UpDown(getSlopeByBodyPoint(Body.Hand_Left, Body.Shoulder_Left), (int)(Body.Hand_Left)) == vDir.up &&
+            isBodyStraight();
+
+        if (positionCorrect)
+        {
+            Debug.Log(">>米right!!!");    //不debug時可註解此行
+            return true;
+        };
+        //右手往斜上,左腳往斜下
+        positionCorrect = direction(getSlopeByBodyPoint(Body.Hip_Right, Body.Ankle_Right)).Equals(Direction.slash) &&
+            direction(getSlopeByBodyPoint(Body.Hand_Left, Body.Shoulder_Left)).Equals(Direction.slash) &&
+            UpDown(getSlopeByBodyPoint(Body.Hand_Left, Body.Shoulder_Left), (int)(Body.Hand_Left)) == vDir.up;
+
+        if (positionCorrect)
+        {
+            Debug.Log(">>米right!!!");    //不debug時可註解此行
+            return true;
+        };
+        
+        return false;
+    }
+
     Boolean isRonWord()  //卍字正確
-    {   
+    {
         Boolean positionCorrect;
         positionCorrect = direction(getSlopeByBodyPoint(Body.Hand_Right, Body.Elbow_Right)).Equals(Direction.verticle);
         if (!positionCorrect)
@@ -218,8 +271,9 @@ public class CubemanController : MonoBehaviour
         Debug.Log(">>right!!!");    //不debug時可註解此行
         return true;
     }
-     
-    Boolean isCardWord() { //是卡字
+
+    Boolean isCardWord()
+    { //是卡字
         Boolean positionCorrect;
         positionCorrect = direction(getSlopeByBodyPoint(Body.Hand_Right, Body.Shoulder_Right)).Equals(Direction.horizontal);
         if (!positionCorrect)
@@ -381,29 +435,17 @@ public class CubemanController : MonoBehaviour
                     {
                         isCardWord();    //哲亞加的 可刪除
                         Vector3 posJoint = bones[i].transform.localPosition;
-                        // Vector3 posJoint = bones[i].transform.TransformPoint(bones[i].transform.position);
 
                         int parI = parIdxs[i];
                         Vector3 posParent = bones[parI].transform.localPosition;
-                        // Vector3 posParent = bones[parI].transform.TransformPoint(bones[parI].transform.position);
-                        //Vector3 test = bones[i].transform.TransformPoint(bones[parI].transform.position);
+
                         if (bones[parI].gameObject.activeSelf)
                         {
-
+                            lines[i].gameObject.SetActive(true);
+                            lines[i].SetPosition(0, posParent);
+                            lines[i].SetPosition(1, posJoint);
                             //lines[i].SetVertexCount(2);
-                            if (i == 6)
-                            {
-                                lines[i].gameObject.SetActive(true);
-                                lines[i].SetPosition(0, posParent);
-                                lines[i].SetPosition(1, posJoint);
-                                // Debug.Log("posParent=" + posParent * 100+ ",posJoint= "+ posJoint * 100);
-                                float x = posJoint.x - posParent.x;
-                                float y = posJoint.y - posParent.y;
-                                float slope = y / x;
-                                // Debug.Log("slope="+slope);
-                                //Debug.Log("test=" + test);
-                                //Debug.Log("s=" + Vector3.Angle(posJoint, posParent));
-                            }
+                            
                             bLineDrawn = true;
                         }
                     }
